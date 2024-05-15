@@ -1,1 +1,176 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Remote Print"/><link rel="manifest" href="/printer/manifest.json"/><title>Remote Print</title><script defer="defer" src="/printer/static/js/main.64a9c253.js"></script><link href="/printer/static/css/main.e6c13ad2.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Print</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="file"] {
+            width: 100%;
+        }
+        .form-group input[type="number"] {
+            width: 50px;
+            padding: 5px;
+        }
+        .form-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .form-group button:disabled {
+            background-color: #c0c0c0;
+        }
+        .success-message {
+            text-align: center;
+            color: green;
+            margin-top: 20px;
+        }
+        .form-group.inline {
+            display: flex;
+            align-items: center;
+        }
+        .form-group.inline label {
+            margin: 0 10px 0 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>创谷 A113 远程打印</h1>
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="file">选择文件</label>
+            <input type="file" id="file" accept=".pdf,.docx,.doc,.png,.jpg,.txt,.cpp,.py,.c" />
+        </div>
+        <div class="form-group inline">
+            <label for="numCopies">打印份数:</label>
+            <input type="number" id="numCopies" min="1" value="1" />
+        </div>
+        <div class="form-group inline">
+            <label for="duplex">双面打印:</label>
+            <input type="checkbox" id="duplex" />
+        </div>
+        <div class="form-group">
+            <button type="submit" id="submitBtn" disabled>上传</button>
+        </div>
+    </form>
+    <p class="success-message" id="successMessage" style="display: none;">上传成功！</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('file');
+        const numCopiesInput = document.getElementById('numCopies');
+        const duplexInput = document.getElementById('duplex');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const form = document.getElementById('uploadForm');
+        let file = null;
+
+        fileInput.addEventListener('change', (event) => {
+            file = event.target.files[0];
+            submitBtn.disabled = !file;
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!file) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+            successMessage.style.display = 'none';
+
+            try {
+                const orderResponse = await fetch("https://wwkserver.top/wwkserver/addorder", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain"
+                    },
+                    body: JSON.stringify({
+                        printer_id: 2,
+                        openid: "WEB"
+                    })
+                });
+                const orderData = await orderResponse.json();
+                const oid = orderData.order_id;
+
+                const formData = new FormData();
+                const suffix = /\.\w+$/.exec(file.name).toString().toLowerCase();
+                const storage_name = Date.now() + "-" + parseInt(Math.random() * 1000000) + suffix;
+
+                formData.set("file", file);
+                formData.set("openid", "WEB");
+                formData.set("storage_name", storage_name);
+                formData.set("file_name", file.name);
+                formData.set("file_size", file.size);
+                formData.set("file_type", suffix === ".pdf" || suffix === ".docx" || suffix === ".doc" || suffix === ".txt" || suffix === ".cpp" || suffix === ".c" || suffix === ".py" ? "file" : "image");
+                formData.set("order_id", oid);
+                formData.set("upload_time", Date.now());
+                formData.set("copy_num", numCopiesInput.value);
+                formData.set("is_duplex", duplexInput.checked);
+
+                await fetch("https://wwkserver.top/wwkserver/addorder/uploadfile", {
+                    method: "POST",
+                    body: formData
+                });
+
+                await fetch("https://wwkserver.top/wwkserver/ackprinting?orderid=" + oid);
+
+                const payResponse = await fetch("https://wwkserver.top/wwkserver/pay?orderid=" + oid);
+
+                if (payResponse.status === 200) {
+                    successMessage.style.display = 'block';
+                } else {
+                    console.error('Upload failed');
+                }
+            } catch (error) {
+                console.error("Error uploading files:", error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
