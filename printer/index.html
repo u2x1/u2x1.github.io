@@ -69,6 +69,15 @@
         .form-group.inline label {
             margin: 0 10px 0 0;
         }
+
+        @media (max-width: 600px) {
+            .container {
+                background: none;
+                padding: 20px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -77,7 +86,6 @@
     <h1>创谷 A113 远程打印</h1>
     <form id="uploadForm">
         <div class="form-group">
-            <label for="file">选择文件</label>
             <input type="file" id="file" accept=".pdf,.docx,.doc,.png,.jpg,.txt,.cpp,.py,.c" />
         </div>
         <div class="form-group inline">
@@ -92,7 +100,7 @@
             <button type="submit" id="submitBtn" disabled>上传</button>
         </div>
     </form>
-    <p class="success-message" id="successMessage" style="display: none;">上传成功！</p>
+    <p class="success-message" id="successMessage" style="display: none;">上传成功</p>
 </div>
 
 <script>
@@ -115,7 +123,7 @@
             if (!file) return;
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
+            submitBtn.textContent = '上传中...';
             successMessage.style.display = 'none';
 
             try {
@@ -165,7 +173,7 @@
                 console.error("Error uploading files:", error);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Upload';
+                submitBtn.textContent = '上传';
             }
         });
     });
