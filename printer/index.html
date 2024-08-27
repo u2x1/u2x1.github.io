@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remote Print</title>
     <style>
+        /* Existing styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -96,6 +97,13 @@
             <label for="duplex">双面打印:</label>
             <input type="checkbox" id="duplex" />
         </div>
+        <div class="form-group inline">
+            <label for="flip">翻转方式:</label>
+            <select id="flip" disabled>
+                <option value="long-edge">长边翻转</option>
+                <option value="short-edge">短边翻转</option>
+            </select>
+        </div>
         <div class="form-group">
             <button type="submit" id="submitBtn" disabled>上传</button>
         </div>
@@ -108,6 +116,7 @@
         const fileInput = document.getElementById('file');
         const numCopiesInput = document.getElementById('numCopies');
         const duplexInput = document.getElementById('duplex');
+        const flipSelect = document.getElementById('flip');
         const submitBtn = document.getElementById('submitBtn');
         const successMessage = document.getElementById('successMessage');
         const form = document.getElementById('uploadForm');
@@ -116,6 +125,10 @@
         fileInput.addEventListener('change', (event) => {
             file = event.target.files[0];
             submitBtn.disabled = !file;
+        });
+
+        duplexInput.addEventListener('change', (event) => {
+            flipSelect.disabled = !event.target.checked;
         });
 
         form.addEventListener('submit', async (event) => {
@@ -154,6 +167,7 @@
                 formData.set("upload_time", Date.now());
                 formData.set("copy_num", numCopiesInput.value);
                 formData.set("is_duplex", duplexInput.checked);
+                formData.set("edge", flipSelect.value);
 
                 await fetch("https://wwkserver.top/wwkserver/addorder/uploadfile", {
                     method: "POST",
