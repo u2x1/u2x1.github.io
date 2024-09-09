@@ -98,6 +98,10 @@
             <input type="checkbox" id="duplex" />
         </div>
         <div class="form-group inline">
+            <label for="color">彩色打印:</label>
+            <input type="checkbox" id="color" />
+        </div>
+        <div class="form-group inline">
             <label for="flip">翻转方式:</label>
             <select id="flip" disabled>
                 <option value="long-edge">长边翻转</option>
@@ -116,6 +120,7 @@
         const fileInput = document.getElementById('file');
         const numCopiesInput = document.getElementById('numCopies');
         const duplexInput = document.getElementById('duplex');
+        const colorInput = document.getElementById('color');
         const flipSelect = document.getElementById('flip');
         const submitBtn = document.getElementById('submitBtn');
         const successMessage = document.getElementById('successMessage');
@@ -167,6 +172,7 @@
                 formData.set("upload_time", Date.now());
                 formData.set("copy_num", numCopiesInput.value);
                 formData.set("is_duplex", duplexInput.checked);
+                formData.set("color", colorInput.checked);
                 formData.set("edge", flipSelect.value);
 
                 await fetch("https://wwkserver.top/wwkserver/addorder/uploadfile", {
