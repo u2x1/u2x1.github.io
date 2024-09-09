@@ -108,6 +108,14 @@
                 <option value="short-edge">短边翻转</option>
             </select>
         </div>
+        <div class="form-group inline">
+            <label for="quality">打印质量:</label>
+            <select id="quality">
+                <option value="Normal">普通</option>
+                <option value="Fine">高清</option>
+                <option value="Draft">一般</option>
+            </select>
+        </div>
         <div class="form-group">
             <button type="submit" id="submitBtn" disabled>上传</button>
         </div>
@@ -122,6 +130,7 @@
         const duplexInput = document.getElementById('duplex');
         const colorInput = document.getElementById('color');
         const flipSelect = document.getElementById('flip');
+        const qualitySelect = document.getElementById('quality');
         const submitBtn = document.getElementById('submitBtn');
         const successMessage = document.getElementById('successMessage');
         const form = document.getElementById('uploadForm');
@@ -174,6 +183,7 @@
                 formData.set("is_duplex", duplexInput.checked);
                 formData.set("color", colorInput.checked);
                 formData.set("edge", flipSelect.value);
+                formData.set("quality", qualitySelect.value);
 
                 await fetch("https://wwkserver.top/wwkserver/addorder/uploadfile", {
                     method: "POST",
